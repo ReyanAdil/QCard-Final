@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "224268396277-p8meaunr9npj9nh509d8oujnu5rjormk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.qcard",
+            "certificate_hash": "7f280a15828d416413b42636b8ae82bb4fe5be7e"
+          }
+        },
+        {
           "client_id": "224268396277-klds7gqorgcd2a6vfmmc85306vav119q.apps.googleusercontent.com",
           "client_type": 3
         }

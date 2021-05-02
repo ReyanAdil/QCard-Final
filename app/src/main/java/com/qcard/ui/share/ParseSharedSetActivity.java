@@ -40,7 +40,7 @@ import com.qcard.util.RealPathUtil;
 import java.util.List;
 
 public class ParseSharedSetActivity extends AppCompatActivity {
-
+    //Triggers when Import clicked
     private static final int REQUEST_READ_STORAGE_PERMISSION = 285;
     private static final int REQUEST_LOGIN = 598;
 
@@ -55,11 +55,12 @@ public class ParseSharedSetActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mProgressBar = findViewById(R.id.progressBar);
-
+        // Check if already logged in
         checkLogin();
     }
 
     private void checkLogin() {
+        //If user not logged in
         if (GlobalData.getCurrentUser(this) == null) {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.putExtra("requestedLogin", true);
@@ -69,10 +70,12 @@ public class ParseSharedSetActivity extends AppCompatActivity {
         }
     }
 
+    //If permission granted to read/write
     private void checkImportOption() {
         if (isPermissionGranted()) {
             startImport();
         } else {
+            //or Request permission
             requestPermission();
         }
     }
@@ -86,8 +89,9 @@ public class ParseSharedSetActivity extends AppCompatActivity {
 
         try {
             String content = ExportUtil.getStringFromFile(realPath);
+            //create sharable wrapper from content of the file
             SharableWrapper sharableWrapper = new Gson().fromJson(content, SharableWrapper.class);
-
+            //Add file to user account
             addQSetToFirebase(sharableWrapper.getSharableQSets().get(0));
 
         } catch (Exception e) {
