@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "224268396277",
+    "project_id": "qcard-7bcc7",
+    "storage_bucket": "qcard-7bcc7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224268396277:android:ec44560c9f3b2545ed47bc",
+        "android_client_info": {
+          "package_name": "com.qcard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224268396277-oa8o72t4tbj5f5k7rf8s40gclhu4o5id.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.qcard",
+            "certificate_hash": "e76ec37cea9998ab3ee56f5f4100c6064358af3b"
+          }
+        },
+        {
+          "client_id": "224268396277-klds7gqorgcd2a6vfmmc85306vav119q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIG3FIlk5dE-FEZL567yMvw9vZ3O3lMyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224268396277-klds7gqorgcd2a6vfmmc85306vav119q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
