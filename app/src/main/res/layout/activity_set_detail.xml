@@ -22,6 +22,17 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <ProgressBar
+            android:id="@+id/progressBarStatus"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="4dp"
+            android:minHeight="3dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewCards"
             android:layout_width="match_parent"
@@ -30,7 +41,7 @@
             android:clipToPadding="false"
             android:padding="4dp"
             app:layout_constraintBottom_toTopOf="@id/fabAddCards"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/progressBarStatus" />
 
         <ProgressBar
             android:id="@+id/progressBar"

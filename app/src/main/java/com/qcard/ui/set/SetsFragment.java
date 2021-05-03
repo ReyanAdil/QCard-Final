@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -15,8 +12,6 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,7 +36,8 @@ public class SetsFragment extends Fragment {
 
     private SetListAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private ProgressBar mProgressBar;
+    private ProgressBar mProgressBarLoading;
+    private ProgressBar mProgressBarStatus;
 
     private TextInputEditText mEditTextFilter;
     private QCategory mFilterCategory = null;
@@ -55,7 +51,8 @@ public class SetsFragment extends Fragment {
             }
         });
 
-        mProgressBar = root.findViewById(R.id.progressBar);
+        mProgressBarStatus = root.findViewById(R.id.progressBarStatus);
+        mProgressBarLoading = root.findViewById(R.id.progressBar);
         mRecyclerView = root.findViewById(R.id.recyclerViewSets);
         mEditTextFilter = root.findViewById(R.id.etCategoryFilter);
         return root;
@@ -90,7 +87,7 @@ public class SetsFragment extends Fragment {
 
     private void loadSets() {
         mAdapter.clear();
-        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBarLoading.setVisibility(View.VISIBLE);
         Query query = FirebaseFirestore.getInstance()
                 .collection(GlobalData.COL_SET);
         query = query.whereEqualTo("userId", GlobalData.getCurrentUser(requireContext()).getUserId());
@@ -102,7 +99,7 @@ public class SetsFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        mProgressBar.setVisibility(View.GONE);
+                        mProgressBarLoading.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 QSet set = document.toObject(QSet.class);
@@ -112,6 +109,37 @@ public class SetsFragment extends Fragment {
                             }
                         } else {
                             Log.w("TAG", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        loadProgressStatus();
+    }
+
+    private void loadProgressStatus() {
+        mProgressBarStatus.setIndeterminate(true);
+        FirebaseFirestore.getInstance()
+                .collection(GlobalData.COL_CARD)
+                .whereEqualTo("userId", GlobalData.getCurrentUser(requireContext()).getUserId())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        mProgressBarStatus.setIndeterminate(false);
+                        if (task.isSuccessful()) {
+                            mProgressBarStatus.setProgress(0);
+                            mProgressBarStatus.setMax(task.getResult().getDocuments().size());
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                if (document.getBoolean("remembered")) {
+                                    mProgressBarStatus.setProgress(mProgressBarStatus.getProgress() + 1);
+                                }
+                            }
+                        } else {
+                            Log.w("TAG", "Error getting status.", task.getException());
                         }
                     }
                 });
@@ -127,10 +155,12 @@ public class SetsFragment extends Fragment {
         if (requestCode == REQUEST_ADD_SET) {
             if (resultCode == Activity.RESULT_OK) {
                 loadSets();
+                loadProgressStatus();
             }
         } else if (requestCode == REQUEST_SET_DETAIL) {
             if (resultCode == Activity.RESULT_OK) {
                 loadSets();
+                loadProgressStatus();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

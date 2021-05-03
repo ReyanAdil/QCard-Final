@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,10 +34,10 @@ import com.qcard.R;
 import com.qcard.data.GlobalData;
 import com.qcard.data.model.QCard;
 import com.qcard.data.model.QSet;
-import com.qcard.data.model.SharableQCard;
 import com.qcard.data.model.SharableQSet;
 import com.qcard.data.model.SharableWrapper;
 import com.qcard.listener.CardSelectedListener;
+import com.qcard.listener.OnChangeListener;
 import com.qcard.ui.card.CardAddActivity;
 import com.qcard.ui.card.CardListAdapter;
 import com.qcard.util.ExportUtil;
@@ -57,7 +55,8 @@ public class SetDetailActivity extends AppCompatActivity {
     private QSet mSet;
     private CardListAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private ProgressBar mProgressBar;
+    private ProgressBar mProgressBarLoading;
+    private ProgressBar mProgressBarStatus;
 
     private ProgressDialog mProgressDialog;
 
@@ -71,7 +70,8 @@ public class SetDetailActivity extends AppCompatActivity {
 
         mSet = (QSet) getIntent().getSerializableExtra("set");
 
-        mProgressBar = findViewById(R.id.progressBar);
+        mProgressBarLoading = findViewById(R.id.progressBar);
+        mProgressBarStatus = findViewById(R.id.progressBarStatus);
         mRecyclerView = findViewById(R.id.recyclerViewCards);
 
         mAdapter = new CardListAdapter();
@@ -79,6 +79,13 @@ public class SetDetailActivity extends AppCompatActivity {
             @Override
             public void onCardSelected(QCard card) {
 
+            }
+        });
+        mAdapter.setOnChangeListener(new OnChangeListener() {
+            @Override
+            public void onChanged() {
+                loadProgressStatus();
+                setResult(RESULT_OK);
             }
         });
         mAdapter.setOnCardEditSelectedListener(new CardSelectedListener() {
@@ -107,7 +114,7 @@ public class SetDetailActivity extends AppCompatActivity {
     private void loadCards() {
         mAdapter.clear();
         setTitle(mSet.getName());
-        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBarLoading.setVisibility(View.VISIBLE);
         FirebaseFirestore.getInstance()
                 .collection(GlobalData.COL_CARD)
                 .whereEqualTo("userId", GlobalData.getCurrentUser(this).getUserId())
@@ -117,7 +124,7 @@ public class SetDetailActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        mProgressBar.setVisibility(View.GONE);
+                        mProgressBarLoading.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 QCard card = document.toObject(QCard.class);
@@ -133,11 +140,44 @@ public class SetDetailActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        loadProgressStatus();
+    }
+
+    private void loadProgressStatus() {
+        mProgressBarStatus.setIndeterminate(true);
+        FirebaseFirestore.getInstance()
+                .collection(GlobalData.COL_CARD)
+                .whereEqualTo("setId", mSet.getId())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        mProgressBarStatus.setIndeterminate(false);
+                        if (task.isSuccessful()) {
+                            mProgressBarStatus.setProgress(0);
+                            mProgressBarStatus.setMax(task.getResult().getDocuments().size());
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                if (document.getBoolean("remembered")) {
+                                    mProgressBarStatus.setProgress(mProgressBarStatus.getProgress() + 1);
+                                }
+                            }
+                        } else {
+                            Log.w("TAG", "Error getting status.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_ADD_CARD || requestCode == REQUEST_EDIT_CARD) {
             if (resultCode == RESULT_OK) {
                 setResult(RESULT_OK);
                 loadCards();
+
+                loadProgressStatus();
             }
         } else if (requestCode == REQUEST_EDIT_SET) {
             if (resultCode == RESULT_OK) {
@@ -148,9 +188,12 @@ public class SetDetailActivity extends AppCompatActivity {
                 setResult(RESULT_OK, result);
 
                 loadCards();
+
+                loadProgressStatus();
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

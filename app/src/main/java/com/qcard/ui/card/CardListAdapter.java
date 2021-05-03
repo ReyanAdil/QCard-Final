@@ -25,6 +25,7 @@ import com.qcard.R;
 import com.qcard.data.GlobalData;
 import com.qcard.data.model.QCard;
 import com.qcard.listener.CardSelectedListener;
+import com.qcard.listener.OnChangeListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class CardListAdapter extends RecyclerView.Adapter<CardListAdapter.CardHo
     private final List<QCard> mItems;
     private CardSelectedListener mCardClickListener;
     private CardSelectedListener mCardEditSelectedListener;
+    private OnChangeListener mOnChangeListener;
 
     public CardListAdapter(@NonNull List<QCard> items) {
         mItems = items;
@@ -109,6 +111,10 @@ public class CardListAdapter extends RecyclerView.Adapter<CardListAdapter.CardHo
         mCardEditSelectedListener = listener;
     }
 
+    public void setOnChangeListener(OnChangeListener listener) {
+        mOnChangeListener = listener;
+    }
+
     class CardHolder extends RecyclerView.ViewHolder {
 
         private final TextView mTextViewName;
@@ -159,6 +165,9 @@ public class CardListAdapter extends RecyclerView.Adapter<CardListAdapter.CardHo
                                 public void onComplete(@NonNull Task<Void> task) {
                                     item.setRemembered(!item.isRemembered());
                                     notifyItemChanged(getAdapterPosition());
+                                    if (mOnChangeListener != null) {
+                                        mOnChangeListener.onChanged();
+                                    }
                                 }
                             });
                 }
@@ -206,6 +215,9 @@ public class CardListAdapter extends RecyclerView.Adapter<CardListAdapter.CardHo
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         remove(item);
+                                        if (mOnChangeListener != null) {
+                                            mOnChangeListener.onChanged();
+                                        }
                                     } else {
                                         Toast.makeText(view.getContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                     }

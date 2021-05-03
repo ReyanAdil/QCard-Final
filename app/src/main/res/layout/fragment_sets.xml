@@ -38,6 +38,19 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <ProgressBar
+        android:id="@+id/progressBarStatus"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="?colorPrimary"
+        android:maxHeight="4dp"
+        android:minHeight="3dp"
+        android:progressTint="?colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardFilter" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewSets"
         android:layout_width="match_parent"
@@ -46,7 +59,7 @@
         android:clipToPadding="false"
         android:padding="4dp"
         app:layout_constraintBottom_toTopOf="@id/fabAddSet"
-        app:layout_constraintTop_toBottomOf="@id/cardFilter" />
+        app:layout_constraintTop_toBottomOf="@id/progressBarStatus" />
 
     <ProgressBar
         android:id="@+id/progressBar"

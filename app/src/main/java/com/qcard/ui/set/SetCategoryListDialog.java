@@ -100,8 +100,7 @@ public class SetCategoryListDialog extends DialogFragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         mProgressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
-                            if(filterMode)
-                                mAdapter.add(null);
+                            if (filterMode) mAdapter.add(null);
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 QCategory cat = document.toObject(QCategory.class);
                                 cat.setId(document.getId());
